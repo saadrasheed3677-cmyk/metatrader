@@ -1,4 +1,3 @@
-
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
@@ -298,9 +297,10 @@ const App: React.FC = () => {
 
         <div className="max-w-7xl mx-auto px-4 md:px-6 relative">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 md:gap-16 items-center">
-            <div className="lg:col-span-5 order-2 lg:order-1">
-              <h2 className="text-4xl md:text-7xl font-heading font-bold mb-6 md:mb-8 leading-tight">
-                Beyond <br/> <GradientText text="ALGORITHMS" className="text-5xl md:text-8xl" />
+            {/* Updated col-span to 6 and reduced font size to prevent overlap */}
+            <div className="lg:col-span-6 order-2 lg:order-1 relative z-10">
+              <h2 className="text-4xl md:text-6xl font-heading font-bold mb-6 md:mb-8 leading-tight">
+                Beyond <br/> <GradientText text="ALGORITHMS" className="text-5xl md:text-6xl lg:text-7xl tracking-tighter" />
               </h2>
               <p className="text-lg md:text-xl text-gray-200 mb-8 md:mb-12 font-light leading-relaxed drop-shadow-md">
                 Kulibre combines traditional technical analysis with modern AI vision and sentiment processing. It doesn't just read numbers; it sees the chart and understands the news.
@@ -328,7 +328,8 @@ const App: React.FC = () => {
               </div>
             </div>
 
-            <div className="lg:col-span-7 relative h-[400px] md:h-[700px] w-full order-1 lg:order-2">
+            {/* Updated col-span to 6 to give text more room */}
+            <div className="lg:col-span-6 relative h-[400px] md:h-[700px] w-full order-1 lg:order-2">
               <div className="absolute inset-0 bg-gradient-to-br from-[#637ab9] to-[#4fb7b3] rounded-3xl rotate-3 opacity-30 blur-xl" />
               <div className="relative h-full w-full rounded-3xl overflow-hidden border border-white/10 group shadow-2xl">
                 <img 
