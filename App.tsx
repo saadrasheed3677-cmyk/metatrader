@@ -1,3 +1,4 @@
+
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
@@ -116,7 +117,7 @@ const App: React.FC = () => {
   };
 
   const navigateLayer = (direction: 'next' | 'prev') => {
-    audioManager.playHover(); // Sound for navigation
+    audioManager.playClick(); // Click sound for navigation buttons inside modal
     if (!selectedLayer) return;
     const currentIndex = SYSTEM_LAYERS.findIndex(a => a.id === selectedLayer.id);
     let nextIndex;
@@ -295,7 +296,7 @@ const App: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 border-t border-l border-white/10 bg-black/20 backdrop-blur-sm">
             {SYSTEM_LAYERS.map((layer) => (
               <ArtistCard key={layer.id} layer={layer} onClick={() => {
-                audioManager.playClick();
+                audioManager.playZoom(); // TRIGGER ZOOM SOUND HERE
                 setSelectedLayer(layer);
               }} />
             ))}

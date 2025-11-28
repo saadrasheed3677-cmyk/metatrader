@@ -57,7 +57,8 @@ class AudioController {
     osc.stop(t + 0.06);
   };
 
-  // Sci-fi Interface Actuation (Click)
+  // "Sci Fi Interface Robot Click"
+  // A mechanical servo actuation mixed with a digital snap
   public playClick = () => {
     if (this.isMuted) return;
     this.init();
@@ -66,46 +67,82 @@ class AudioController {
 
     const t = this.ctx.currentTime;
     
-    // Layer 1: Low mechanical thud (Triangle wave)
-    const osc1 = this.ctx.createOscillator();
-    const gain1 = this.ctx.createGain();
-    osc1.type = 'triangle';
-    osc1.frequency.setValueAtTime(120, t);
-    osc1.frequency.exponentialRampToValueAtTime(40, t + 0.15);
-    gain1.gain.setValueAtTime(0.6, t);
-    gain1.gain.exponentialRampToValueAtTime(0.01, t + 0.15);
+    // 1. Digital Actuation (Square wave chirp)
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
     
-    // Layer 2: High digital "zipp" (Square wave)
-    const osc2 = this.ctx.createOscillator();
-    const gain2 = this.ctx.createGain();
-    const filter2 = this.ctx.createBiquadFilter();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(800, t);
+    osc.frequency.exponentialRampToValueAtTime(200, t + 0.1); // Pitch drop
     
-    osc2.type = 'square';
-    osc2.frequency.setValueAtTime(800, t);
-    osc2.frequency.exponentialRampToValueAtTime(100, t + 0.1);
-    
-    filter2.type = 'lowpass';
-    filter2.frequency.setValueAtTime(3000, t);
-    filter2.frequency.linearRampToValueAtTime(500, t + 0.1);
+    gain.gain.setValueAtTime(0.05, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
 
-    gain2.gain.setValueAtTime(0.08, t);
-    gain2.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+    // 2. Mechanical Latch (Filtered Noise)
+    const noiseBuf = this.ctx.createBuffer(1, this.ctx.sampleRate * 0.05, this.ctx.sampleRate);
+    const output = noiseBuf.getChannelData(0);
+    for (let i = 0; i < noiseBuf.length; i++) {
+      output[i] = Math.random() * 2 - 1;
+    }
+    const noiseSrc = this.ctx.createBufferSource();
+    noiseSrc.buffer = noiseBuf;
+    const noiseFilter = this.ctx.createBiquadFilter();
+    noiseFilter.type = 'bandpass';
+    noiseFilter.frequency.value = 2500;
+    const noiseGain = this.ctx.createGain();
+    noiseGain.gain.setValueAtTime(0.08, t);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
 
-    osc1.connect(gain1);
-    
-    osc2.connect(filter2);
-    filter2.connect(gain2);
-    
-    gain1.connect(this.masterGain);
-    gain2.connect(this.masterGain);
+    osc.connect(gain);
+    gain.connect(this.masterGain);
 
-    osc1.start(t);
-    osc1.stop(t + 0.2);
-    osc2.start(t);
-    osc2.stop(t + 0.2);
+    noiseSrc.connect(noiseFilter);
+    noiseFilter.connect(noiseGain);
+    noiseGain.connect(this.masterGain);
+
+    osc.start(t);
+    osc.stop(t + 0.1);
+    noiseSrc.start(t);
   };
   
-  // Sci-fi System Online / Access Granted (Success)
+  // "Sci Fi Interface Zoom"
+  // Holographic expansion / power up sound
+  public playZoom = () => {
+    if (this.isMuted) return;
+    this.init();
+    this.resume();
+    if (!this.ctx || !this.masterGain) return;
+
+    const t = this.ctx.currentTime;
+    
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    const filter = this.ctx.createBiquadFilter();
+
+    // Sawtooth gives a rich, synth-like timbre
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(100, t);
+    osc.frequency.linearRampToValueAtTime(800, t + 0.3); // Rising pitch
+
+    // Resonant filter sweep
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(200, t);
+    filter.frequency.exponentialRampToValueAtTime(8000, t + 0.3);
+    filter.Q.value = 8; 
+
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.1, t + 0.05);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.masterGain);
+    
+    osc.start(t);
+    osc.stop(t + 0.4);
+  }
+
+  // Sci-fi System Online (Success)
   public playSuccess = () => {
     if (this.isMuted) return;
     this.init();
@@ -115,58 +152,32 @@ class AudioController {
     const t = this.ctx.currentTime;
 
     // Futuristic chord sweep
-    // E Major 7th chord-ish components for a positive, uplifting sound
-    const harmonics = [1, 1.25, 1.5, 2, 4]; // Ratios relative to fundamental
-    const fundamental = 330; // E4
+    const harmonics = [1, 1.5, 2];
+    const fundamental = 440; 
 
-    harmonics.forEach((h, i) => {
+    harmonics.forEach((h) => {
       const osc = this.ctx!.createOscillator();
       const gain = this.ctx!.createGain();
       const filter = this.ctx!.createBiquadFilter();
 
-      // Sawtooth gives a rich, synth-like timbre
-      osc.type = 'sawtooth';
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(fundamental * h, t);
       
-      // Slight detune for chorus effect
-      const detune = (Math.random() - 0.5) * 10;
-      osc.detune.value = detune;
-
-      // Pitch sweep up
-      osc.frequency.setValueAtTime(fundamental * h * 0.5, t); // Start lower
-      osc.frequency.exponentialRampToValueAtTime(fundamental * h, t + 0.15); // Sweep up quickly
-      
-      // Filter sweep (The "Wah" sound)
       filter.type = 'lowpass';
       filter.frequency.setValueAtTime(100, t);
-      filter.frequency.exponentialRampToValueAtTime(8000, t + 0.4);
+      filter.frequency.exponentialRampToValueAtTime(4000, t + 0.3);
       
-      // Volume envelope
       gain.gain.setValueAtTime(0, t);
-      gain.gain.linearRampToValueAtTime(0.08 / harmonics.length, t + 0.1); // Attack
-      gain.gain.exponentialRampToValueAtTime(0.001, t + 1.2); // Long decay
+      gain.gain.linearRampToValueAtTime(0.05, t + 0.1);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 1.0);
       
       osc.connect(filter);
       filter.connect(gain);
       gain.connect(this.masterGain!);
       
       osc.start(t);
-      osc.stop(t + 1.5);
+      osc.stop(t + 1.2);
     });
-    
-    // Add a shimmering high-end sparkle
-    const sparkleOsc = this.ctx.createOscillator();
-    const sparkleGain = this.ctx.createGain();
-    sparkleOsc.type = 'sine';
-    sparkleOsc.frequency.setValueAtTime(2000, t);
-    sparkleOsc.frequency.linearRampToValueAtTime(4000, t + 0.5);
-    sparkleGain.gain.setValueAtTime(0, t);
-    sparkleGain.gain.linearRampToValueAtTime(0.02, t + 0.2);
-    sparkleGain.gain.linearRampToValueAtTime(0, t + 0.8);
-    
-    sparkleOsc.connect(sparkleGain);
-    sparkleGain.connect(this.masterGain);
-    sparkleOsc.start(t);
-    sparkleOsc.stop(t + 1);
   }
 
   public toggleMute() {
