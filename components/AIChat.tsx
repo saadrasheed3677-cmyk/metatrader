@@ -1,4 +1,3 @@
-
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
@@ -10,6 +9,7 @@ import { MessageCircle, X, Send, Cpu } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { sendMessageToGemini } from '../services/geminiService';
 import { ChatMessage } from '../types';
+import { audioManager } from '../services/audioService';
 
 const AIChat: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -36,6 +36,7 @@ const AIChat: React.FC = () => {
 
   const handleSend = async () => {
     if (!input.trim()) return;
+    audioManager.playClick();
 
     const userMessage: ChatMessage = { role: 'user', text: input };
     setMessages(prev => [...prev, userMessage]);
@@ -47,6 +48,8 @@ const AIChat: React.FC = () => {
 
     const responseText = await sendMessageToGemini(input);
     
+    // Play sound on receive
+    audioManager.playHover();
     setMessages(prev => [...prev, { role: 'model', text: responseText }]);
     setIsLoading(false);
   };
@@ -67,7 +70,15 @@ const AIChat: React.FC = () => {
                 <Cpu className="w-5 h-5 text-teal-400 animate-pulse" />
                 <h3 className="font-heading font-bold text-white tracking-wider">KULIBRE AI</h3>
               </div>
-              <button onClick={() => setIsOpen(false)} className="text-white/50 hover:text-white" data-hover="true">
+              <button 
+                onClick={() => {
+                  audioManager.playClick();
+                  setIsOpen(false);
+                }} 
+                className="text-white/50 hover:text-white" 
+                data-hover="true"
+                onMouseEnter={audioManager.playHover}
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -125,6 +136,7 @@ const AIChat: React.FC = () => {
                   disabled={isLoading || !input.trim()}
                   className="bg-teal-600 p-2 rounded-lg hover:bg-teal-500 transition-colors disabled:opacity-50"
                   data-hover="true"
+                  onMouseEnter={audioManager.playHover}
                 >
                   <Send className="w-4 h-4 text-white" />
                 </button>
@@ -138,7 +150,11 @@ const AIChat: React.FC = () => {
       <motion.button
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => {
+          audioManager.playClick();
+          setIsOpen(!isOpen);
+        }}
+        onMouseEnter={audioManager.playHover}
         className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-gradient-to-tr from-teal-600 to-slate-600 flex items-center justify-center shadow-lg shadow-teal-500/40 border border-white/20 z-50 group"
         data-hover="true"
       >

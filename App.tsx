@@ -13,6 +13,7 @@ import CustomCursor from './components/CustomCursor';
 import ArtistCard from './components/ArtistCard';
 import AIChat from './components/AIChat';
 import { SystemLayer } from './types';
+import { audioManager } from './services/audioService';
 
 // Kulibre System Architecture Data
 const SYSTEM_LAYERS: SystemLayer[] = [
@@ -89,14 +90,17 @@ const App: React.FC = () => {
   }, [selectedLayer]);
 
   const handlePurchase = (index: number) => {
+    audioManager.playClick();
     setPurchasingIndex(index);
     setTimeout(() => {
       setPurchasingIndex(null);
       setPurchasedIndex(index);
+      audioManager.playSuccess();
     }, 3500);
   };
 
   const scrollToSection = (id: string) => {
+    audioManager.playClick();
     setMobileMenuOpen(false);
     const element = document.getElementById(id);
     if (element) {
@@ -112,6 +116,7 @@ const App: React.FC = () => {
   };
 
   const navigateLayer = (direction: 'next' | 'prev') => {
+    audioManager.playHover(); // Sound for navigation
     if (!selectedLayer) return;
     const currentIndex = SYSTEM_LAYERS.findIndex(a => a.id === selectedLayer.id);
     let nextIndex;
@@ -142,6 +147,7 @@ const App: React.FC = () => {
             <button 
               key={item} 
               onClick={() => scrollToSection(item.toLowerCase())}
+              onMouseEnter={audioManager.playHover}
               className="hover:text-[#a8fbd3] transition-colors text-white cursor-pointer bg-transparent border-none"
               data-hover="true"
             >
@@ -151,6 +157,7 @@ const App: React.FC = () => {
         </div>
         <button 
           onClick={() => scrollToSection('access')}
+          onMouseEnter={audioManager.playHover}
           className="hidden md:inline-block border border-white px-8 py-3 text-xs font-bold tracking-widest uppercase hover:bg-white hover:text-black transition-all duration-300 text-white cursor-pointer bg-transparent"
           data-hover="true"
         >
@@ -160,7 +167,10 @@ const App: React.FC = () => {
         {/* Mobile Menu Toggle */}
         <button 
           className="md:hidden text-white z-50 relative w-10 h-10 flex items-center justify-center"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          onClick={() => {
+            audioManager.playClick();
+            setMobileMenuOpen(!mobileMenuOpen);
+          }}
         >
            {mobileMenuOpen ? <X /> : <Menu />}
         </button>
@@ -284,7 +294,10 @@ const App: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 border-t border-l border-white/10 bg-black/20 backdrop-blur-sm">
             {SYSTEM_LAYERS.map((layer) => (
-              <ArtistCard key={layer.id} layer={layer} onClick={() => setSelectedLayer(layer)} />
+              <ArtistCard key={layer.id} layer={layer} onClick={() => {
+                audioManager.playClick();
+                setSelectedLayer(layer);
+              }} />
             ))}
           </div>
         </div>
@@ -315,6 +328,7 @@ const App: React.FC = () => {
                   <div
                     key={i} 
                     className="flex items-start gap-6"
+                    onMouseEnter={audioManager.playHover}
                   >
                     <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/5">
                       <feature.icon className="w-6 h-6 text-white" />
@@ -381,6 +395,7 @@ const App: React.FC = () => {
                   whileHover={isDisabled ? {} : { y: -20 }}
                   className={`relative p-8 md:p-10 border border-white/10 backdrop-blur-md flex flex-col min-h-[450px] md:min-h-[550px] transition-colors duration-300 ${ticket.accent} ${isDisabled && !isPurchased ? 'opacity-50 grayscale' : ''} will-change-transform`}
                   data-hover={!isDisabled}
+                  onMouseEnter={!isDisabled ? audioManager.playHover : undefined}
                 >
                   <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
                   
@@ -446,11 +461,18 @@ const App: React.FC = () => {
           </div>
           
           <div className="flex gap-6 md:gap-8 flex-wrap">
-            <a href="https://x.com/GoogleAIStudio" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white font-bold uppercase text-xs tracking-widest transition-colors cursor-pointer" data-hover="true">
+            <a 
+              href="https://x.com/GoogleAIStudio" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-gray-400 hover:text-white font-bold uppercase text-xs tracking-widest transition-colors cursor-pointer" 
+              data-hover="true"
+              onMouseEnter={audioManager.playHover}
+            >
               Twitter
             </a>
-            <span className="text-gray-400 font-bold uppercase text-xs tracking-widest cursor-pointer hover:text-white">Terms</span>
-            <span className="text-gray-400 font-bold uppercase text-xs tracking-widest cursor-pointer hover:text-white">Privacy</span>
+            <span onMouseEnter={audioManager.playHover} className="text-gray-400 font-bold uppercase text-xs tracking-widest cursor-pointer hover:text-white">Terms</span>
+            <span onMouseEnter={audioManager.playHover} className="text-gray-400 font-bold uppercase text-xs tracking-widest cursor-pointer hover:text-white">Privacy</span>
           </div>
         </div>
       </footer>
@@ -474,9 +496,13 @@ const App: React.FC = () => {
             >
               {/* Close Button */}
               <button
-                onClick={() => setSelectedLayer(null)}
+                onClick={() => {
+                  audioManager.playClick();
+                  setSelectedLayer(null);
+                }}
                 className="absolute top-4 right-4 z-20 p-2 rounded-full bg-black/50 text-white hover:bg-white hover:text-black transition-colors"
                 data-hover="true"
+                onMouseEnter={audioManager.playHover}
               >
                 <X className="w-6 h-6" />
               </button>
@@ -487,6 +513,7 @@ const App: React.FC = () => {
                 className="absolute left-4 bottom-4 translate-y-0 md:top-1/2 md:bottom-auto md:-translate-y-1/2 z-20 p-3 rounded-full bg-black/50 text-white hover:bg-white hover:text-black transition-colors border border-white/10 backdrop-blur-sm"
                 data-hover="true"
                 aria-label="Previous Layer"
+                onMouseEnter={audioManager.playHover}
               >
                 <ChevronLeft className="w-6 h-6" />
               </button>
@@ -496,6 +523,7 @@ const App: React.FC = () => {
                 className="absolute right-4 bottom-4 translate-y-0 md:top-1/2 md:bottom-auto md:-translate-y-1/2 z-20 p-3 rounded-full bg-black/50 text-white hover:bg-white hover:text-black transition-colors border border-white/10 backdrop-blur-sm md:right-8"
                 data-hover="true"
                 aria-label="Next Layer"
+                onMouseEnter={audioManager.playHover}
               >
                 <ChevronRight className="w-6 h-6" />
               </button>

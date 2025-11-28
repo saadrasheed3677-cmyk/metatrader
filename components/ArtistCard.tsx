@@ -1,4 +1,3 @@
-
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
@@ -9,6 +8,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { SystemLayer } from '../types';
 import { ArrowUpRight, Activity } from 'lucide-react';
+import { audioManager } from '../services/audioService';
 
 interface LayerCardProps {
   layer: SystemLayer;
@@ -25,6 +25,7 @@ const ArtistCard: React.FC<LayerCardProps> = ({ layer, onClick }) => {
       animate="rest"
       data-hover="true"
       onClick={onClick}
+      onMouseEnter={audioManager.playHover}
     >
       {/* Image Background with Zoom */}
       <div className="absolute inset-0 overflow-hidden">
